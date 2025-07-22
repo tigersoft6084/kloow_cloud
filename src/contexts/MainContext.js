@@ -26,18 +26,19 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const runApp = async (id, url, server) => {
+  const runApp = async (user, id, url, server) => {
     try {
-      await axios.post('/api/run_app', { id, url, server });
-      return { status: true, message: '' };
+      const response = await axios.post('/api/run_app', { user, id, url, server });
+      return { status: true, message: response.data.port };
     } catch (error) {
+      console.log('error', error);
       return { status: false, message: error.message };
     }
   };
 
-  const stopApp = async (id) => {
+  const stopApp = async (user, id) => {
     try {
-      await axios.post('/api/stop_app', { id });
+      await axios.post('/api/stop_app', { user, id });
       return { status: true, message: '' };
     } catch (error) {
       return { status: false, message: error.message };

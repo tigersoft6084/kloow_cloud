@@ -1,5 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const { exec } = require('child_process');
+const db = require('./database');
 
 const app = express();
 const PORT = 3001;
@@ -101,9 +103,20 @@ app.post('/api/app_list', async (req, res) => {
 // Run app endpoint
 app.post('/api/run_app', async (req, res) => {
   try {
-    const { id, url, server } = req.body;
+    const { user, id, url, server } = req.body;
+    const { default: getPort, portNumbers } = await import('get-port');
+    const port = await getPort({ port: portNumbers(10000, 32767) });
 
-    res.json({ success: true });
+    exec(`./kasm/run.sh ${[`${user}-${id}`, `"${url}"`, `http://${server}:3000`, port].join(' ')}`, (error, stdout, stderr) => {
+      if (error) return res.status(500).json({ error: error.message });
+
+      const sql = 'INSERT INTO containers (user_id, project_id, container_id, status) VALUES (?, ?, ?, ?)';
+      db.run(sql, [user, id, stdout.trim(), 'running'], function (err) {
+        if (err) return res.status(500).json({ error: err.message });
+
+        res.json({ success: true, port });
+      });
+    });
   } catch (error) {
     console.error(`Error run app: ${error.message}`);
     res.status(500).json({ error: 'Failed to run app' });
@@ -113,9 +126,26 @@ app.post('/api/run_app', async (req, res) => {
 // Stop app endpoint
 app.post('/api/stop_app', async (req, res) => {
   try {
-    const { id } = req.body;
+    const { user, id } = req.body;
 
-    res.json({ success: true });
+    db.get('SELECT * FROM containers WHERE user_id = ? and project_id = ? and status = ?', [user, id, 'running'], (err, row) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!row) return res.status(404).json({ error: 'Not found' });
+
+      exec(`./kasm/stop.sh ${row.container_id}`, (error, stdout, stderr) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+
+        const sql = 'UPDATE containers SET status = ? WHERE id = ?';
+        db.run(sql, ['stopped', row.id], function (err) {
+          if (err) return res.status(500).json({ error: err.message });
+
+          res.json({ success: true });
+        });
+      });
+    });
   } catch (error) {
     console.error(`Error stop app: ${error.message}`);
     res.status(500).json({ error: 'Failed to stop app' });

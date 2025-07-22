@@ -47,11 +47,11 @@ const AuthRoutes = {
 const MainRoutes = {
   path: 'main',
   element: (
-    <GuestGuard>
+    <AuthGuard>
       <MainProvider>
         <Outlet />
       </MainProvider>
-    </GuestGuard>
+    </AuthGuard>
   ),
   children: [
     {

@@ -4,6 +4,7 @@
   "version": "1.0.0",
   "description": "ProxyLogin Description",
   "author": "ProxyLogin Team",
+  "license": "MIT",
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
     "@emotion/react": "^11.14.0",
@@ -15,6 +16,7 @@
     "body-parser": "^2.2.0",
     "express": "^5.1.0",
     "formik": "^2.4.6",
+    "get-port": "^7.1.0",
     "http-proxy-middleware": "^3.0.5",
     "js-cookie": "^3.0.5",
     "node-fetch": "^3.3.2",
@@ -30,6 +32,7 @@
     "react-timer-hook": "^3.0.5",
     "redux": "^4.2.0",
     "simplebar-react": "^3.3.1",
+    "sqlite3": "^5.1.7",
     "stylis-plugin-rtl": "^2.1.1",
     "web-vitals": "^2.1.4",
     "yup": "^1.6.1"

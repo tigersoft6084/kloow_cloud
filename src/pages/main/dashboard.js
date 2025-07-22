@@ -3,9 +3,12 @@ import useMain from 'hooks/useMain';
 import Loader from 'components/Loader';
 import { Button, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Stack } from '@mui/material';
 import useSnackbar from 'hooks/useSnackbar';
+import useAuth from 'hooks/useAuth';
 
 const Dashboard = () => {
   const { getAppList, appList, runApp, stopApp } = useMain();
+  const { user } = useAuth();
+
   const { errorMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [runningStatus, setRunningStatus] = useState({}); // Map of id to boolean
@@ -27,7 +30,12 @@ const Dashboard = () => {
   const run = async (id, url, server) => {
     try {
       setTryRunningStatus((prev) => [...prev, id]);
-      await runApp(id, url, server);
+      const result = await runApp(user, id, url, server);
+      if (!result.status) {
+        errorMessage(result.message);
+      } else {
+        setRunningStatus((prev) => ({ ...prev, [id]: result.message }));
+      }
       setTryRunningStatus((prev) => prev.filter((e) => e !== id));
     } catch (error) {
       errorMessage(`Failed to run the executable for id ${id}: ${error.message}`);
@@ -37,15 +45,25 @@ const Dashboard = () => {
   const stop = async (id) => {
     try {
       setTryRunningStatus((prev) => [...prev, id]);
-      const result = await stopApp(id);
+      const result = await stopApp(user, id);
       if (!result.status) {
         errorMessage(result.message);
+      } else {
+        setRunningStatus((prev) => ({ ...prev, [id]: '' }));
       }
       setTryRunningStatus((prev) => prev.filter((e) => e !== id));
     } catch (error) {
       errorMessage(`Failed to stop the browser for id ${id}: ${error.message}`);
     }
   };
+
+  useEffect(() => {
+    const initialStatus = appList.reduce((acc, app) => {
+      acc[app.id] = '';
+      return acc;
+    }, {});
+    setRunningStatus(initialStatus);
+  }, [appList]);
 
   return (
     <>
@@ -68,16 +86,29 @@ const Dashboard = () => {
                     <TableCell>{app.title}</TableCell>
                     <TableCell>{app.description}</TableCell>
                     <TableCell>
-                      <Button
-                        disableElevation
-                        variant="contained"
-                        size="small"
-                        onClick={() => (runningStatus[app.id] ? stop(app.id) : run(app.id, app.initUrl, app.servers?.[0]))}
-                        disabled={tryRunningStatus.includes(app.id)}
-                        color={runningStatus[app.id] ? 'error' : 'primary'}
-                      >
-                        {runningStatus[app.id] ? 'Stop' : 'Run'}
-                      </Button>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Button
+                          disableElevation
+                          variant="contained"
+                          size="small"
+                          onClick={() => (runningStatus[app.id] !== '' ? stop(app.id) : run(app.id, app.initUrl, app.servers?.[0]))}
+                          disabled={tryRunningStatus.includes(app.id)}
+                          color={runningStatus[app.id] ? 'error' : 'primary'}
+                        >
+                          {runningStatus[app.id] ? 'Stop' : 'Run'}
+                        </Button>
+                        {runningStatus[app.id] && (
+                          <Button
+                            disableElevation
+                            variant="contained"
+                            size="small"
+                            onClick={() => window.open(`https://46.62.137.213:${runningStatus[app.id]}`, '_blank')}
+                            color="primary"
+                          >
+                            View
+                          </Button>
+                        )}
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 ))}
