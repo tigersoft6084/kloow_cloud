@@ -7,6 +7,7 @@ DEFAULT_ARGS=""
 
 #if [[ $MAXIMIZE == 'true' ]] ; then
 DEFAULT_ARGS+=" --start-maximized --proxy-server=$PROXY_URL"
+# "
 #fi
 ARGS=${APP_ARGS:-$DEFAULT_ARGS}
 

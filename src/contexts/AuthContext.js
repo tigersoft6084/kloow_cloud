@@ -5,43 +5,92 @@ import { LOGIN, LOGOUT } from 'reducers/actions';
 import authReducer, { initialState } from 'reducers/auth';
 
 import { sleep } from 'utils/common';
-import axios from 'utils/axios';
+import axios from 'axios';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  const extractErrorMessage = (htmlString) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlString, 'text/html');
-    const contentDiv = doc.querySelector('.wc-block-components-notice-banner__content');
-    return contentDiv ? contentDiv.textContent.trim() : null;
-  };
+  const axiosServices = axios.create({
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  // Set up Axios interceptor
+  axiosServices.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
+      if (error.response?.status === 401 && !originalRequest.__isRetryRequest) {
+        originalRequest.__isRetryRequest = true;
+        const refreshResult = await refreshAccessToken();
+        if (refreshResult.status) {
+          return axiosServices(originalRequest);
+        }
+        // Redirect to login on refresh failure
+        window.location.href = '/auth/login';
+        return Promise.reject({ ...error, message: 'Session expired. Please log in again.' });
+      }
+      return Promise.reject(error);
+    }
+  );
 
-  const getLoginNonce = async () => {
+  // Login function (as provided)
+  const login = async (values) => {
     try {
-      const response = await axios.get('/api/login_nonce');
-      return response.data.nonce;
+      const response = await axiosServices.post('/api/login', values, {
+        withCredentials: true
+      });
+
+      if (response.data.authentication_success) {
+        dispatch({
+          type: LOGIN,
+          payload: {
+            user: response.data.user
+          }
+        });
+        return { status: true, message: 'Login successful' };
+      }
+
+      return { status: false, message: response.data.message || 'Login failed' };
     } catch (error) {
-      return null;
+      console.error('Login error:', error);
+      return {
+        status: false,
+        message: error.response?.data?.message || 'Authentication failed'
+      };
     }
   };
 
-  const login = async (values) => {
+  // Refresh token function (as provided)
+  const refreshAccessToken = async () => {
     try {
-      const response = await axios.post('/api/login', values);
+      const response = await axiosServices.post(
+        '/api/refresh-token',
+        {},
+        {
+          withCredentials: true
+        }
+      );
 
-      const { redirected, responseBody } = response.data;
-
-      if (redirected) {
-        dispatch({ type: LOGIN, payload: { user: values.username } });
-        return { status: true, message: '' };
-      } else {
-        return { status: false, message: extractErrorMessage(responseBody) || 'Failed to login' };
+      if (response.data.authentication_success) {
+        dispatch({
+          type: LOGIN,
+          payload: {
+            user: response.data.user
+          }
+        });
+        return { status: true, message: 'Token refreshed successfully' };
       }
+
+      return { status: false, message: response.data.message || 'Token refresh failed' };
     } catch (error) {
-      return { status: false, message: `Failed to login` };
+      console.error('Token refresh error:', error);
+      return {
+        status: false,
+        message: error.response?.data?.message || 'Token refresh failed'
+      };
     }
   };
 
@@ -63,15 +112,23 @@ export const AuthProvider = ({ children }) => {
     return { status: true, data: '' };
   };
 
+  // Client-side logout function
   const logout = async () => {
-    dispatch({ type: LOGOUT });
+    try {
+      await axiosServices.post('/api/logout', {}, { withCredentials: true });
+      dispatch({ type: LOGOUT });
+      return { status: true, message: 'Logout successful' };
+    } catch (error) {
+      console.error('Logout error:', error);
+      return { status: false, message: 'Logout failed' };
+    }
   };
 
   return (
     <AuthContext.Provider
       value={{
         ...state,
-        getLoginNonce,
+        axiosServices,
         login,
         signup,
         forgotPassword,

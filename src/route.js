@@ -47,11 +47,9 @@ const AuthRoutes = {
 const MainRoutes = {
   path: 'main',
   element: (
-    <AuthGuard>
-      <MainProvider>
-        <Outlet />
-      </MainProvider>
-    </AuthGuard>
+    <MainProvider>
+      <Outlet />
+    </MainProvider>
   ),
   children: [
     {

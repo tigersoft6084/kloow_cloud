@@ -31,6 +31,8 @@ COPY ./common/urlblocklist.json /etc/opt/chrome/policies/managed/urlblocklist.js
 COPY ./custom_startup.sh $STARTUPDIR/custom_startup.sh
 RUN chmod +x $STARTUPDIR/custom_startup.sh
 
+COPY ./www /usr/share/kasmvnc/www/
+
 # Install Custom Certificate Authority
 COPY ./certificates $INST_SCRIPTS/certificates/
 RUN bash $INST_SCRIPTS/certificates/install_ca_cert.sh && rm -rf $INST_SCRIPTS/certificates/
@@ -39,7 +41,6 @@ ENV KASM_RESTRICTED_FILE_CHOOSER=1
 COPY ./gtk/ $INST_SCRIPTS/gtk/
 RUN bash $INST_SCRIPTS/gtk/install_restricted_file_chooser.sh
 
-COPY ./www /usr/share/kasmvnc/www/
 
 ######### End Customizations ###########
 

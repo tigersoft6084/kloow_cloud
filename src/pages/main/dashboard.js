@@ -30,7 +30,7 @@ const Dashboard = () => {
   const run = async (id, url, server) => {
     try {
       setTryRunningStatus((prev) => [...prev, id]);
-      const result = await runApp(user, id, url, server);
+      const result = await runApp(user.username, id, url, server);
       if (!result.status) {
         errorMessage(result.message);
       } else {
@@ -45,7 +45,7 @@ const Dashboard = () => {
   const stop = async (id) => {
     try {
       setTryRunningStatus((prev) => [...prev, id]);
-      const result = await stopApp(user, id);
+      const result = await stopApp(user.username, id);
       if (!result.status) {
         errorMessage(result.message);
       } else {
@@ -71,8 +71,8 @@ const Dashboard = () => {
         <Loader />
       ) : (
         <Stack sx={{ width: '100%', minHeight: `calc(100vh - 48px)` }}>
-          <TableContainer>
-            <Table>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 48px)' }}>
+            <Table stickyHeader>
               <TableHead>
                 <TableRow>
                   <TableCell>Name</TableCell>
