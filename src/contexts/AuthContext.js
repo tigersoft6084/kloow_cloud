@@ -1,37 +1,59 @@
-import React, { createContext, useReducer } from 'react';
 import PropTypes from 'prop-types';
-
-import { LOGIN, LOGOUT } from 'reducers/actions';
-import authReducer, { initialState } from 'reducers/auth';
+import React, { createContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { sleep } from 'utils/common';
 import axios from 'axios';
 
+import useSnackbar from 'hooks/useSnackbar';
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const navigate = useNavigate();
+  const { errorMessage } = useSnackbar();
 
   const axiosServices = axios.create({
+    baseURL: '/api/v1',
     headers: {
       'Content-Type': 'application/json'
     }
   });
-  // Set up Axios interceptor
+
   axiosServices.interceptors.response.use(
     (response) => response,
     async (error) => {
-      const originalRequest = error.config;
-      if (error.response?.status === 401 && !originalRequest.__isRetryRequest) {
-        originalRequest.__isRetryRequest = true;
-        const refreshResult = await refreshAccessToken();
-        if (refreshResult.status) {
-          return axiosServices(originalRequest);
-        }
-        // Redirect to login on refresh failure
-        window.location.href = '/auth/login';
-        return Promise.reject({ ...error, message: 'Session expired. Please log in again.' });
+      let originalRequest = error.config;
+
+      // Handle 403 Forbidden error
+      if (error.response?.status === 403) {
+        errorMessage(error.response.data.message);
+        localStorage.removeItem('isAuthenticated');
+        navigate('/auth/login', { replace: true });
+        return Promise.reject(error);
       }
+
+      // Handle 401 Unauthorized error
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+
+        try {
+          const refreshResult = await refreshAccessToken();
+          if (refreshResult.status) {
+            localStorage.setItem('isAuthenticated', 'Y');
+            return axiosServices(originalRequest);
+          } else {
+            localStorage.removeItem('isAuthenticated');
+            navigate('/auth/login', { replace: true });
+            return Promise.reject(new Error('Token refresh failed'));
+          }
+        } catch (refreshError) {
+          localStorage.removeItem('isAuthenticated');
+          navigate('/auth/login', { replace: true });
+          return Promise.reject(refreshError);
+        }
+      }
+
       return Promise.reject(error);
     }
   );
@@ -39,17 +61,12 @@ export const AuthProvider = ({ children }) => {
   // Login function (as provided)
   const login = async (values) => {
     try {
-      const response = await axiosServices.post('/api/login', values, {
+      const response = await axiosServices.post('/login', values, {
         withCredentials: true
       });
 
       if (response.data.authentication_success) {
-        dispatch({
-          type: LOGIN,
-          payload: {
-            user: response.data.user
-          }
-        });
+        localStorage.setItem('isAuthenticated', 'Y');
         return { status: true, message: 'Login successful' };
       }
 
@@ -66,21 +83,11 @@ export const AuthProvider = ({ children }) => {
   // Refresh token function (as provided)
   const refreshAccessToken = async () => {
     try {
-      const response = await axiosServices.post(
-        '/api/refresh-token',
-        {},
-        {
-          withCredentials: true
-        }
-      );
+      const response = await axiosServices.get('/refresh-token', {
+        withCredentials: true
+      });
 
       if (response.data.authentication_success) {
-        dispatch({
-          type: LOGIN,
-          payload: {
-            user: response.data.user
-          }
-        });
         return { status: true, message: 'Token refreshed successfully' };
       }
 
@@ -115,9 +122,10 @@ export const AuthProvider = ({ children }) => {
   // Client-side logout function
   const logout = async () => {
     try {
-      await axiosServices.post('/api/logout', {}, { withCredentials: true });
-      dispatch({ type: LOGOUT });
-      return { status: true, message: 'Logout successful' };
+      await axiosServices.get('/logout', { withCredentials: true });
+      localStorage.removeItem('isAuthenticated');
+      navigate('/auth/login', { replace: true });
+      return { status: true, message: 'Logout success' };
     } catch (error) {
       console.error('Logout error:', error);
       return { status: false, message: 'Logout failed' };
@@ -127,7 +135,6 @@ export const AuthProvider = ({ children }) => {
   return (
     <AuthContext.Provider
       value={{
-        ...state,
         axiosServices,
         login,
         signup,

@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import useMain from 'hooks/useMain';
 import Loader from 'components/Loader';
-import { Button, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Stack } from '@mui/material';
+import { Button, Table, TableContainer, TableHead, TableRow, TableCell, TableBody, Stack, IconButton, Typography } from '@mui/material';
 import useSnackbar from 'hooks/useSnackbar';
 import useAuth from 'hooks/useAuth';
+import { LogoutOutlined } from '@ant-design/icons';
 
 const Dashboard = () => {
   const { getAppList, appList, runApp, stopApp } = useMain();
-  const { user } = useAuth();
+  const { logout } = useAuth();
 
   const { errorMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
@@ -21,16 +22,16 @@ const Dashboard = () => {
 
   useEffect(() => {
     const initialStatus = appList.reduce((acc, app) => {
-      acc[app.id] = false;
+      acc[app.id] = app.port;
       return acc;
     }, {});
     setRunningStatus(initialStatus);
   }, [appList]);
 
-  const run = async (id, url, server) => {
+  const run = async (id, url, proxyServer) => {
     try {
       setTryRunningStatus((prev) => [...prev, id]);
-      const result = await runApp(user.username, id, url, server);
+      const result = await runApp(id, url, proxyServer);
       if (!result.status) {
         errorMessage(result.message);
       } else {
@@ -45,11 +46,11 @@ const Dashboard = () => {
   const stop = async (id) => {
     try {
       setTryRunningStatus((prev) => [...prev, id]);
-      const result = await stopApp(user.username, id);
+      const result = await stopApp(id);
       if (!result.status) {
         errorMessage(result.message);
       } else {
-        setRunningStatus((prev) => ({ ...prev, [id]: '' }));
+        setRunningStatus((prev) => ({ ...prev, [id]: 0 }));
       }
       setTryRunningStatus((prev) => prev.filter((e) => e !== id));
     } catch (error) {
@@ -57,21 +58,19 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    const initialStatus = appList.reduce((acc, app) => {
-      acc[app.id] = '';
-      return acc;
-    }, {});
-    setRunningStatus(initialStatus);
-  }, [appList]);
-
   return (
     <>
       {loading ? (
         <Loader />
       ) : (
-        <Stack sx={{ width: '100%', minHeight: `calc(100vh - 48px)` }}>
-          <TableContainer sx={{ maxHeight: 'calc(100vh - 48px)' }}>
+        <Stack spacing={3} sx={{ width: '100%', minHeight: `calc(100vh - 48px)` }}>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h4">Application List</Typography>
+            <IconButton onClick={logout}>
+              <LogoutOutlined />
+            </IconButton>
+          </Stack>
+          <TableContainer sx={{ maxHeight: 'calc(100vh - 90px)' }}>
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
@@ -91,13 +90,13 @@ const Dashboard = () => {
                           disableElevation
                           variant="contained"
                           size="small"
-                          onClick={() => (runningStatus[app.id] !== '' ? stop(app.id) : run(app.id, app.initUrl, app.servers?.[0]))}
+                          onClick={() => (runningStatus[app.id] !== 0 ? stop(app.id) : run(app.id, app.initUrl, app.servers?.[0]))}
                           disabled={tryRunningStatus.includes(app.id)}
                           color={runningStatus[app.id] ? 'error' : 'primary'}
                         >
-                          {runningStatus[app.id] ? 'Stop' : 'Run'}
+                          {runningStatus[app.id] === 0 ? 'Run' : 'Stop'}
                         </Button>
-                        {runningStatus[app.id] && (
+                        {runningStatus[app.id] !== 0 && (
                           <Button
                             disableElevation
                             variant="contained"

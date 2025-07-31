@@ -14,13 +14,7 @@ export const MainProvider = ({ children }) => {
 
   const getAppList = async () => {
     try {
-      const response = await axiosServices.post(
-        '/api/app_list',
-        {
-          rootUrl: 'https://maserver.click'
-        },
-        { withCredentials: true }
-      );
+      const response = await axiosServices.post('/app_list', { rootUrl: 'https://maserver.click' }, { withCredentials: true });
       dispatch({
         type: APP_LIST_WITH_PROXY,
         payload: { appList: response.data.appList }
@@ -31,18 +25,18 @@ export const MainProvider = ({ children }) => {
     }
   };
 
-  const runApp = async (user, id, url, server) => {
+  const runApp = async (id, url, proxyServer) => {
     try {
-      const response = await axiosServices.post('/api/run_app', { user, id, url, server }, { withCredentials: true });
+      const response = await axiosServices.post('/run_app', { id, url, proxyServer }, { withCredentials: true });
       return { status: true, message: response.data.port };
     } catch (error) {
       return { status: false, message: error.response?.data?.message || error.message };
     }
   };
 
-  const stopApp = async (user, id) => {
+  const stopApp = async (id) => {
     try {
-      await axiosServices.post('/api/stop_app', { user, id }, { withCredentials: true });
+      await axiosServices.post('/stop_app', { id }, { withCredentials: true });
       return { status: true, message: '' };
     } catch (error) {
       return { status: false, message: error.response?.data?.message || error.message };

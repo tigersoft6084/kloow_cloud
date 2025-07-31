@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 // material-ui
 import {
   Button,
@@ -26,7 +26,7 @@ import useAuth from 'hooks/useAuth';
 import useSnackbar from 'hooks/useSnackbar';
 
 const Login = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { login } = useAuth();
   const { successMessage, errorMessage } = useSnackbar();
 
@@ -50,6 +50,7 @@ const Login = () => {
           setSubmitting(false);
           if (response.status) {
             successMessage('Success to login.');
+            navigate('/main/dashboard', { replace: true });
           } else {
             errorMessage(response.message);
           }
