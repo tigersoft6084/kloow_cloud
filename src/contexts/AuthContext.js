@@ -1,23 +1,33 @@
-import PropTypes from 'prop-types';
 import React, { createContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
-import { sleep } from 'utils/common';
 import axios from 'axios';
 
 import useSnackbar from 'hooks/useSnackbar';
+
+import { sleep } from 'utils/common';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
-  const { errorMessage } = useSnackbar();
+  const { errorMessage, successMessage } = useSnackbar();
 
   const axiosServices = axios.create({
     baseURL: '/api/v1',
     headers: {
       'Content-Type': 'application/json'
     }
+  });
+
+  // Add Authorization header with access token if available
+  axiosServices.interceptors.request.use((config) => {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
   });
 
   axiosServices.interceptors.response.use(
@@ -29,7 +39,9 @@ export const AuthProvider = ({ children }) => {
       if (error.response?.status === 403) {
         errorMessage(error.response.data.message);
         localStorage.removeItem('isAuthenticated');
-        navigate('/auth/login', { replace: true });
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        navigate('/auth/login');
         return Promise.reject(error);
       }
 
@@ -41,15 +53,20 @@ export const AuthProvider = ({ children }) => {
           const refreshResult = await refreshAccessToken();
           if (refreshResult.status) {
             localStorage.setItem('isAuthenticated', 'Y');
+            originalRequest.headers.Authorization = `Bearer ${localStorage.getItem('accessToken')}`;
             return axiosServices(originalRequest);
           } else {
             localStorage.removeItem('isAuthenticated');
-            navigate('/auth/login', { replace: true });
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            navigate('/auth/login');
             return Promise.reject(new Error('Token refresh failed'));
           }
         } catch (refreshError) {
           localStorage.removeItem('isAuthenticated');
-          navigate('/auth/login', { replace: true });
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          navigate('/auth/login');
           return Promise.reject(refreshError);
         }
       }
@@ -58,19 +75,22 @@ export const AuthProvider = ({ children }) => {
     }
   );
 
-  // Login function (as provided)
+  // Updated login function to handle JWT tokens in response
   const login = async (values) => {
     try {
-      const response = await axiosServices.post('/login', values, {
-        withCredentials: true
-      });
+      const response = await axiosServices.post('/login', values);
 
       if (response.data.authentication_success) {
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
         localStorage.setItem('isAuthenticated', 'Y');
         return { status: true, message: 'Login successful' };
       }
 
-      return { status: false, message: response.data.message || 'Login failed' };
+      return {
+        status: false,
+        message: response.data.message || 'Login failed'
+      };
     } catch (error) {
       console.error('Login error:', error);
       return {
@@ -80,18 +100,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Refresh token function (as provided)
+  // Updated refresh token function to handle JWT tokens in response
   const refreshAccessToken = async () => {
     try {
-      const response = await axiosServices.get('/refresh-token', {
-        withCredentials: true
+      const refreshToken = localStorage.getItem('refreshToken');
+      if (!refreshToken) {
+        return { status: false, message: 'No refresh token available' };
+      }
+
+      const response = await axiosServices.post('/refresh-token', {
+        refreshToken
       });
 
       if (response.data.authentication_success) {
+        localStorage.setItem('accessToken', response.data.accessToken);
         return { status: true, message: 'Token refreshed successfully' };
       }
 
-      return { status: false, message: response.data.message || 'Token refresh failed' };
+      return {
+        status: false,
+        message: response.data.message || 'Token refresh failed'
+      };
     } catch (error) {
       console.error('Token refresh error:', error);
       return {
@@ -119,16 +148,16 @@ export const AuthProvider = ({ children }) => {
     return { status: true, data: '' };
   };
 
-  // Client-side logout function
+  // Updated logout function
   const logout = async () => {
     try {
-      await axiosServices.get('/logout', { withCredentials: true });
       localStorage.removeItem('isAuthenticated');
-      navigate('/auth/login', { replace: true });
-      return { status: true, message: 'Logout success' };
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      navigate('/auth/login');
+      successMessage('Successfully logged out');
     } catch (error) {
       console.error('Logout error:', error);
-      return { status: false, message: 'Logout failed' };
     }
   };
 

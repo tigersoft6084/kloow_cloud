@@ -6,10 +6,10 @@ import { useNavigate } from 'react-router-dom';
 const GuestGuard = ({ children }) => {
   const navigate = useNavigate();
   const isAuthenticated = localStorage.getItem('isAuthenticated') === 'Y';
-  console.log(isAuthenticated);
+
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/main/dashboard', { replace: true });
+      navigate('/main/dashboard');
     }
   }, [isAuthenticated, navigate]);
 

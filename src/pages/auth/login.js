@@ -50,7 +50,7 @@ const Login = () => {
           setSubmitting(false);
           if (response.status) {
             successMessage('Success to login.');
-            navigate('/main/dashboard', { replace: true });
+            navigate('/main/dashboard');
           } else {
             errorMessage(response.message);
           }

@@ -1,6 +1,5 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { exec } = require('child_process');
 const jwt = require('jsonwebtoken');
@@ -14,7 +13,6 @@ const PORT = 3001;
 
 // Middleware
 app.use(bodyParser.json({ limit: '1kb' })); // Limit payload size for security
-app.use(cookieParser());
 app.use(
   cors({
     origin: 'http://localhost:3000', // Adjust to your frontend's domain/port
@@ -26,9 +24,10 @@ app.use((req, _res, next) => {
   next();
 });
 
-// Create a router for
+// Create a router
 const apiRouter = express.Router();
 
+// Updated login endpoint to return JWT tokens in response
 apiRouter.post('/login', async (req, res) => {
   try {
     const { log, pwd } = req.body;
@@ -50,21 +49,10 @@ apiRouter.post('/login', async (req, res) => {
     // Generate refresh token
     const refreshToken = jwt.sign({ uid, username, server, membership_expire_time }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
-    // Set tokens in HTTP-only cookies
-    res.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: 15 * 60 * 1000 // 15 minute
-    });
-
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-    });
-
     res.json({
       authentication_success: true,
+      accessToken,
+      refreshToken,
       user: { uid, username, server, membership_expire_time }
     });
   } catch (error) {
@@ -73,9 +61,9 @@ apiRouter.post('/login', async (req, res) => {
   }
 });
 
-// Refresh token endpoint
-apiRouter.get('/refresh-token', async (req, res) => {
-  const refreshToken = req.cookies.refreshToken;
+// Updated refresh token endpoint to accept refresh token in body and return new access token
+apiRouter.post('/refresh-token', async (req, res) => {
+  const { refreshToken } = req.body;
 
   if (!refreshToken) {
     return res.status(401).json({ message: 'No refresh token provided' });
@@ -93,28 +81,15 @@ apiRouter.get('/refresh-token', async (req, res) => {
     // Generate new access token
     const newAccessToken = jwt.sign({ uid, username, server, membership_expire_time }, JWT_SECRET, { expiresIn: '15m' });
 
-    // Set new access token in cookie
-    res.cookie('accessToken', newAccessToken, {
-      httpOnly: true,
-      sameSite: 'strict',
-      maxAge: 15 * 60 * 1000
-    });
-
     res.json({
       authentication_success: true,
+      accessToken: newAccessToken,
       user: { uid, username, server, membership_expire_time }
     });
   } catch (error) {
     console.error('Refresh token verification message:', error);
     res.status(401).json({ message: 'Invalid or expired refresh token' });
   }
-});
-
-// Logout endpoint
-apiRouter.get('/logout', (req, res) => {
-  res.clearCookie('accessToken');
-  res.clearCookie('refreshToken');
-  res.json({ message: 'Logged out successfully' });
 });
 
 // App list endpoint
@@ -239,7 +214,7 @@ apiRouter.post('/stop_app', verifyToken, async (req, res) => {
   }
 });
 
-// Mount the router with the  prefix
+// Mount the router with the prefix
 app.use('/api/v1', apiRouter);
 
 // Error handling middleware
