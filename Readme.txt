@@ -40,3 +40,6 @@ sudo apt-get install -y \
 docker pull kasmweb/core-ubuntu-jammy:develop
 
 6. run build.sh
+
+
+pm2 start yarn --name "user_front" -- start

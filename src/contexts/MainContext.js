@@ -14,7 +14,7 @@ export const MainProvider = ({ children }) => {
 
   const getAppList = async () => {
     try {
-      const response = await axiosServices.post('/app_list', { rootUrl: 'https://maserver.click' }, { withCredentials: true });
+      const response = await axiosServices.get('/app_list', { withCredentials: true });
       dispatch({
         type: APP_LIST_WITH_PROXY,
         payload: { appList: response.data.appList }
