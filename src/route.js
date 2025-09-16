@@ -9,12 +9,28 @@ import Login from 'pages/auth/login';
 import Signup from 'pages/auth/signup';
 import ForgotPassword from 'pages/auth/forgot';
 import ResetPassword from 'pages/auth/reset';
+import Landing from 'pages/landing';
 
 import Dashboard from 'pages/main/dashboard';
 
 const redirectRoutes = {
   path: '*',
   element: <AuthGuard />
+};
+
+const LandingRoutes = {
+  path: '/',
+  element: (
+    <GuestGuard>
+      <Outlet />
+    </GuestGuard>
+  ),
+  children: [
+    {
+      path: '/',
+      element: <Landing />
+    }
+  ]
 };
 
 const AuthRoutes = {
@@ -62,6 +78,6 @@ const MainRoutes = {
 };
 
 const ProjectRoutes = () => {
-  return useRoutes([redirectRoutes, AuthRoutes, MainRoutes]);
+  return useRoutes([redirectRoutes, LandingRoutes, AuthRoutes, MainRoutes]);
 };
 export default ProjectRoutes;
