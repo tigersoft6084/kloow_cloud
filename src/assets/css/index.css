@@ -9,7 +9,7 @@ body {
   margin: 0;
   /* Allow vertical scroll, prevent horizontal overflow */
   overflow-x: hidden;
-  background: #0b0b12;
+  /* background: #0b0b12; */
   color: #e6e6e6;
 }
 
