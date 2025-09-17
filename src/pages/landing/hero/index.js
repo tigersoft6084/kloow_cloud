@@ -2,7 +2,11 @@ import React from 'react';
 import Header from '../header';
 import '../../../assets/css/landing.css';
 import bgHero from '../../../assets/images/landing/section1_background.png';
+
+import { useNavigate } from 'react-router-dom';
+
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <div
       className="landing-container"
@@ -43,7 +47,7 @@ const Hero = () => {
           </div>
 
           <div className="hero-cta">
-            <button className="cta-button">
+            <button className="cta-button" onClick={() => navigate('/auth/login')}>
               Start Your 14-Day Free Trial <span className="arrow">→</span>
             </button>
             <div className="credit-note">No credit card required</div>
