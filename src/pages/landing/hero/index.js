@@ -35,7 +35,7 @@ const Hero = () => {
           <h1 className="hero-title">
             The Command Center for Your
             <br className="br-desktop" />
-            <span className="highlight"> Digital Operations</span>
+            <span className="highlight">Digital Operations</span>
           </h1>
           <div className="hero-subtitle">
             Manage multiple client profiles and accounts in completely isolated browser environments. Kloow offers maximum security and

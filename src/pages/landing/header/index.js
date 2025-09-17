@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import logoSvg from '../../../assets/images/landing/logo.svg';
 import '../../../assets/css/landing.css';
 
+import { useNavigate } from 'react-router-dom';
+
 const Header = () => {
+  const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const toggleMobileMenu = () => {
@@ -29,8 +32,12 @@ const Header = () => {
 
         {/* Action Buttons */}
         <div className="auth-actions">
-          <button className="btn btn-ghost">Login</button>
-          <button className="btn btn-primary">Get Started</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/auth/login')}>
+            Login
+          </button>
+          <button className="btn btn-primary" onClick={() => navigate('/auth/login')}>
+            Get Started
+          </button>
         </div>
 
         {/* Mobile Menu Button */}
