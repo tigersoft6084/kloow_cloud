@@ -101,7 +101,7 @@ const Dashboard = () => {
                             disableElevation
                             variant="contained"
                             size="small"
-                            onClick={() => window.open(`https://kloow.com:${runningStatus[app.id]}`, '_blank')}
+                            onClick={() => window.open(`https://www.kloow.com:${runningStatus[app.id]}`, '_blank')}
                             color="primary"
                           >
                             View
