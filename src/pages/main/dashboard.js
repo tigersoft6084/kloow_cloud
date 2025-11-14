@@ -471,7 +471,7 @@ const Dashboard = () => {
             ))}
           </List>
         </Box>
-        <Box sx={{ width: 'max-content', flexGrow: 1, p: 0 }}>
+        <Box sx={{ width: `calc(100% - 240px)`, flexGrow: 1, p: 0 }}>
           {loading ? (
             <Loader />
           ) : (
@@ -605,11 +605,11 @@ const Dashboard = () => {
                       return true;
                     })
                     .map((app) => (
-                      <Grid key={`app_${app.id}`}>
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`app_${app.id}`}>
                         <Stack
                           spacing={2}
                           sx={{
-                            width: 372,
+                            width: '100%',
                             bgcolor: '#2C3145',
                             color: 'white',
                             borderRadius: '20px',
