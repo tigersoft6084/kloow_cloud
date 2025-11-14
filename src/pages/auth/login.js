@@ -76,8 +76,8 @@ const Login = () => {
         </Typography>
         <Formik
           initialValues={{
-            log: 'admin@test.seo',
-            pwd: '123123123'
+            log: '',
+            pwd: ''
           }}
           validationSchema={Yup.object().shape({
             log: Yup.string().max(255).required('Username is required'),
