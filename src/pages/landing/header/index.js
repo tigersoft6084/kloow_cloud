@@ -68,8 +68,12 @@ const Header = () => {
           </a>
         </nav>
         <div className="mobile-auth-actions">
-          <button className="btn btn-ghost">Login</button>
-          <button className="btn btn-primary">Get Started</button>
+          <button className="btn btn-ghost" onClick={() => navigate('/auth/login')}>
+            Login
+          </button>
+          <button className="btn btn-primary" onClick={() => navigate('/auth/login')}>
+            Get Started
+          </button>
         </div>
       </div>
     </header>

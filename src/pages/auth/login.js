@@ -7,10 +7,10 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  InputLabel,
   OutlinedInput,
   Stack,
-  Typography
+  Typography,
+  Box
   // Divider,
 } from '@mui/material';
 // assets
@@ -18,6 +18,7 @@ import { LoginOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/i
 import { LoadingOutlined } from '@ant-design/icons';
 // import GoogleIcon from "assets/images/google.svg";
 
+import LogoIcon from 'assets/images/logo_title.png';
 // third party
 import * as Yup from 'yup';
 import { Formik } from 'formik';
@@ -34,182 +35,164 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <Stack alignItems="center" justifyContent="center" sx={{ maxWidth: 440 }}>
-      <Formik
-        initialValues={{
-          log: 'admin@test.seo',
-          pwd: '123123123'
+    <>
+      <Box
+        sx={{
+          position: 'fixed',
+          width: '100vw',
+          height: '100vh',
+          zIndex: 1,
+          background: 'radial-gradient(40% 40% at 50% 40%, rgba(19, 33, 65, 1) 0%,  rgba(22, 23, 30, 1) 100%)'
         }}
-        validationSchema={Yup.object().shape({
-          log: Yup.string().max(255).required('Username is required'),
-          pwd: Yup.string().max(255).required('Password is required')
-        })}
-        onSubmit={async (values, { setSubmitting }) => {
-          setSubmitting(true);
-          const response = await login(values);
-          setSubmitting(false);
-          if (response.status) {
-            successMessage('Success to login.');
-            navigate('/main/dashboard');
-          } else {
-            errorMessage(response.message);
-          }
+      />
+      <Stack
+        alignItems="center"
+        sx={{
+          pt: '100px',
+          maxWidth: 375,
+          width: '100%',
+          minHeight: '100vh',
+          color: 'white',
+          margin: 'auto',
+          zIndex: 2
         }}
       >
-        {({ handleBlur, handleChange, handleSubmit, errors, isSubmitting, touched, values }) => (
-          <form noValidate onSubmit={handleSubmit}>
-            <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }}>
-                <Typography variant="h4" textAlign="center">
-                  <b>Login</b>
-                </Typography>
-              </Grid>
-              {/* <Grid size={{ xs: 12 }}>
-                  <Button
-                    fullWidth
-                    disabled={isSubmitting}
-                    variant="outlined"
-                    startIcon={
-                      <Stack
-                        alignItems="center"
-                        justifyContent="center"
-                        sx={{ height: 44 }}
-                      >
-                        <img
-                          src={GoogleIcon}
-                          alt="google"
-                          style={{ width: 36, height: 36 }}
-                        />
-                      </Stack>
-                    }
-                    sx={{ borderRadius: "100px" }}
-                  >
-                    Continue with Google
-                  </Button>
+        <Box sx={{ mb: '60px' }}>
+          <img src={LogoIcon} alt="logo" style={{ height: 24 }} />
+        </Box>
+        <Typography
+          textAlign="center"
+          sx={{
+            fontSize: 24,
+            fontWeight: 600,
+            lineHeight: '30px',
+            letterSpacing: -0.15,
+            mb: 4
+          }}
+        >
+          Log In back to
+          <br />
+          your account
+        </Typography>
+        <Formik
+          initialValues={{
+            log: 'admin@test.seo',
+            pwd: '123123123'
+          }}
+          validationSchema={Yup.object().shape({
+            log: Yup.string().max(255).required('Username is required'),
+            pwd: Yup.string().max(255).required('Password is required')
+          })}
+          onSubmit={async (values, { setSubmitting }) => {
+            setSubmitting(true);
+            const response = await login(values);
+            setSubmitting(false);
+            if (response.status) {
+              successMessage('Success to login.');
+              navigate('/main/dashboard');
+            } else {
+              errorMessage(response.message);
+            }
+          }}
+        >
+          {({ handleBlur, handleChange, handleSubmit, errors, isSubmitting, touched, values }) => (
+            <form noValidate onSubmit={handleSubmit}>
+              <Grid container spacing={1}>
+                <Grid size={{ xs: 12 }}>
+                  <Stack spacing={1}>
+                    <OutlinedInput
+                      id="log-login"
+                      type="text"
+                      value={values.log}
+                      name="log"
+                      onBlur={handleBlur}
+                      onChange={handleChange}
+                      placeholder="Email address"
+                      fullWidth
+                      error={Boolean(touched.log && errors.log)}
+                      size="small"
+                      sx={{
+                        color: 'white',
+                        bgcolor: '#252731',
+                        border: 'solid 1px #343847'
+                      }}
+                    />
+                    {touched.log && errors.log && (
+                      <FormHelperText error id="standard-weight-helper-text-log-login" sx={{ fontSize: '14px' }}>
+                        {errors.log}
+                      </FormHelperText>
+                    )}
+                  </Stack>
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <Divider>
-                    <Typography variant="body2">OR</Typography>
-                  </Divider>
-                </Grid> */}
-              <Grid size={{ xs: 12 }}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="log-login">Username or email address*</InputLabel>
-                  <OutlinedInput
-                    id="log-login"
-                    type="text"
-                    value={values.log}
-                    name="log"
-                    onBlur={handleBlur}
-                    onChange={handleChange}
-                    placeholder="Enter username or email address"
-                    fullWidth
-                    error={Boolean(touched.log && errors.log)}
-                  />
-                  {touched.log && errors.log && (
-                    <FormHelperText error id="standard-weight-helper-text-log-login">
-                      {errors.log}
-                    </FormHelperText>
-                  )}
-                </Stack>
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Stack spacing={1}>
-                  <InputLabel htmlFor="pwd-login">Password*</InputLabel>
-                  <OutlinedInput
-                    fullWidth
-                    color={capsWarning ? 'warning' : 'primary'}
-                    error={Boolean(touched.pwd && errors.pwd)}
-                    id="pwd-login"
-                    type={showPassword ? 'text' : 'password'}
-                    value={values.pwd}
-                    name="pwd"
-                    onBlur={(event) => {
-                      setCapsWarning(false);
-                      handleBlur(event);
-                    }}
-                    onKeyDown={(keyEvent) => {
-                      if (keyEvent.getModifierState('CapsLock')) {
-                        setCapsWarning(true);
-                      } else {
+                  <Stack spacing={1}>
+                    <OutlinedInput
+                      fullWidth
+                      placeholder="Password"
+                      color={capsWarning ? 'warning' : 'primary'}
+                      error={Boolean(touched.pwd && errors.pwd)}
+                      id="pwd-login"
+                      type={showPassword ? 'text' : 'password'}
+                      value={values.pwd}
+                      name="pwd"
+                      size="small"
+                      sx={{
+                        color: 'white',
+                        bgcolor: '#252731',
+                        border: 'solid 1px #343847'
+                      }}
+                      onBlur={(event) => {
                         setCapsWarning(false);
+                        handleBlur(event);
+                      }}
+                      onKeyDown={(keyEvent) => {
+                        if (keyEvent.getModifierState('CapsLock')) {
+                          setCapsWarning(true);
+                        } else {
+                          setCapsWarning(false);
+                        }
+                      }}
+                      onChange={handleChange}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="toggle password visibility"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                            onMouseDown={(e) => e.preventDefault()}
+                            edge="end"
+                          >
+                            {showPassword ? (
+                              <VisibilityOutlined sx={{ color: 'white' }} />
+                            ) : (
+                              <VisibilityOffOutlined sx={{ color: 'white' }} />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
                       }
-                    }}
-                    onChange={handleChange}
-                    endAdornment={
-                      <InputAdornment position="end">
-                        <IconButton
-                          aria-label="toggle password visibility"
-                          onClick={() => setShowPassword((prev) => !prev)}
-                          onMouseDown={(e) => e.preventDefault()}
-                          edge="end"
-                        >
-                          {showPassword ? <VisibilityOutlined /> : <VisibilityOffOutlined />}
-                        </IconButton>
-                      </InputAdornment>
-                    }
-                    placeholder="Enter password"
-                  />
-                  {capsWarning && (
-                    <Typography variant="caption" sx={{ color: 'warning.main' }} id="warning-helper-text-password-login">
-                      Caps lock on!
-                    </Typography>
-                  )}
-                  {touched.pwd && errors.pwd && (
-                    <FormHelperText error id="standard-weight-helper-text-pwd-login">
-                      {errors.pwd}
-                    </FormHelperText>
-                  )}
-                </Stack>
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Button
-                  disableElevation
-                  disabled={isSubmitting}
-                  fullWidth
-                  type="submit"
-                  variant="contained"
-                  startIcon={isSubmitting ? <LoadingOutlined /> : <LoginOutlined />}
-                  size="large"
-                >
-                  Login
-                </Button>
-              </Grid>
-              {/* <Grid size={{ xs: 12 }}>
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="center"
-                    spacing={1}
-                  >
-                    <Typography
-                      onClick={() => navigate("/auth/signup")}
-                      sx={{
-                        cursor: "pointer",
-                        "&:hover": { textDecoration: "underline" },
-                      }}
-                    >
-                      I don{"'"}t have an account. Sign Up
-                    </Typography>
-                    <Typography>
-                      <b>&#xb7;</b>
-                    </Typography>
-                    <Typography
-                      onClick={() => navigate("/auth/forgot")}
-                      sx={{
-                        cursor: "pointer",
-                        "&:hover": { textDecoration: "underline" },
-                      }}
-                    >
-                      Forgot password?
-                    </Typography>
+                    />
+                    {capsWarning && (
+                      <Typography variant="caption" sx={{ color: 'warning.main' }} id="warning-helper-text-password-login">
+                        Caps lock on!
+                      </Typography>
+                    )}
+                    {touched.pwd && errors.pwd && (
+                      <FormHelperText error id="standard-weight-helper-text-pwd-login" sx={{ fontSize: '14px' }}>
+                        {errors.pwd}
+                      </FormHelperText>
+                    )}
                   </Stack>
-                </Grid> */}
-            </Grid>
-          </form>
-        )}
-      </Formik>
-    </Stack>
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <Button disableElevation disabled={isSubmitting} fullWidth type="submit" variant="contained" size="large" sx={{ mt: 3 }}>
+                    Log In
+                  </Button>
+                </Grid>
+              </Grid>
+            </form>
+          )}
+        </Formik>
+      </Stack>
+    </>
   );
 };
 

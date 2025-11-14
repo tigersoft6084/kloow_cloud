@@ -1,14 +1,18 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { Box, Stack } from '@mui/material';
+import { Stack } from '@mui/material';
 import Snackbar from 'components/Snackbar';
 
 const Layout = ({ children }) => {
   return (
-    <Stack>
-      <Stack alignItems="center" justifyContent="center" sx={{ width: '100vw', height: '100vh' }}>
-        <Box sx={{ p: 3 }}>{children}</Box>
-      </Stack>
+    <Stack
+      sx={{
+        width: '100vw',
+        height: '100vh',
+        background: 'rgba(22, 23, 30, 1)'
+      }}
+    >
+      {children}
       <Snackbar />
     </Stack>
   );
