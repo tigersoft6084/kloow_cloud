@@ -735,6 +735,7 @@ const Dashboard = () => {
                                       borderRadius: '8px',
                                       backgroundColor: '#28A745'
                                     }}
+                                    disabled={tryRunningStatus.includes(app.id)}
                                   >
                                     <AdsClickOutlinedIcon sx={{ mr: 1 }} />
                                     VIEW
