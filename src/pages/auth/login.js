@@ -14,8 +14,7 @@ import {
   // Divider,
 } from '@mui/material';
 // assets
-import { LoginOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
-import { LoadingOutlined } from '@ant-design/icons';
+import { VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material';
 // import GoogleIcon from "assets/images/google.svg";
 
 import LogoIcon from 'assets/images/logo_title.png';
