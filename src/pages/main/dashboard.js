@@ -88,6 +88,7 @@ const Dashboard = () => {
   const { errorMessage } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [runningStatus, setRunningStatus] = useState({}); // Map of id to boolean
+  const [runningFlag, setRunningFlag] = useState(false);
   const [tryRunningStatus, setTryRunningStatus] = useState([]);
   const [sortOrder, setSortOrder] = useState('none'); // none | az | za
   const [selectedTab, setSelectedTab] = useState(Tabs.Applications); // all | favorites | recents
@@ -135,6 +136,7 @@ const Dashboard = () => {
 
   const run = async (id, url, proxyServer) => {
     try {
+      setRunningFlag(true);
       setTryRunningStatus((prev) => [...prev, id]);
       const result = await runApp(id, url, proxyServer);
       if (!result.status) {
@@ -144,7 +146,9 @@ const Dashboard = () => {
         setRunningStatus((prev) => ({ ...prev, [id]: result.message }));
       }
       setTryRunningStatus((prev) => prev.filter((e) => e !== id));
+      setRunningFlag(false);
     } catch (error) {
+      setRunningFlag(false);
       errorMessage(`Failed to run the executable for id ${id}: ${error.message}`);
     }
   };
@@ -703,7 +707,7 @@ const Dashboard = () => {
                                   disableElevation
                                   variant="contained"
                                   onClick={() => (runningStatus[app.id] ? stop(app.id) : run(app.id, app.initUrl, app.servers?.[0]))}
-                                  disabled={tryRunningStatus.includes(app.id)}
+                                  disabled={tryRunningStatus.includes(app.id) || runningFlag}
                                   sx={{
                                     width: runningStatus[app.id] !== 0 ? '50%' : '100%',
                                     fontWeight: 'bold',
@@ -735,7 +739,7 @@ const Dashboard = () => {
                                       borderRadius: '8px',
                                       backgroundColor: '#28A745'
                                     }}
-                                    disabled={tryRunningStatus.includes(app.id)}
+                                    disabled={tryRunningStatus.includes(app.id) || runningFlag}
                                   >
                                     <AdsClickOutlinedIcon sx={{ mr: 1 }} />
                                     VIEW
@@ -748,6 +752,7 @@ const Dashboard = () => {
                                 disableElevation
                                 variant="contained"
                                 onClick={() => window.location.assign(`https://${app.domain}`, '_blank')}
+                                disabled={runningFlag}
                                 sx={{
                                   fontWeight: 'bold',
                                   borderRadius: '8px',
