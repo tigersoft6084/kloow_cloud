@@ -38,6 +38,7 @@ import LoginIcon from '../../assets/icons/login.png';
 
 import DefaultAppImage from '../../assets/images/logo.png';
 import LogoWithTitle from '../../assets/images/logo_title.png';
+import ScreamingFrogIcon from "../../assets/images/screaming_frog.png";
 
 import Loader from 'components/Loader';
 import SimpleBarScroll from 'components/SimpleBar';
@@ -48,11 +49,13 @@ import CloseIcon from '@mui/icons-material/Close';
 import useSnackbar from 'hooks/useSnackbar';
 import useMain from 'hooks/useMain';
 import useAuth from 'hooks/useAuth';
+import { color } from '@mui/system';
 
 const Tabs = {
   Applications: 1,
   Favorites: 2,
-  Recents: 3
+  Recents: 3,
+  "Screaming Frog": 4
 };
 
 const listItemButtonSx = {
@@ -193,6 +196,8 @@ const Dashboard = () => {
         return 'Favorites';
       case Tabs.Recents:
         return 'Recently Used';
+      case Tabs["Screaming Frog"]:
+        return "Screaming Frog";
       default:
         return 'Application List';
     }
@@ -206,6 +211,8 @@ const Dashboard = () => {
         return 'Your most-used applications for quick access.';
       case Tabs.Recents:
         return "Applications you've launched recently.";
+      case Tabs["Screaming Frog"]:
+        return "The Screaming Frog SEO Spider and Log File Analyser";
       default:
         return 'Pre-loaded, ready-to-use marketing tools for faster campaigns.';
     }
@@ -468,6 +475,7 @@ const Dashboard = () => {
                     {key === 'Applications' && <Language />}
                     {key === 'Favorites' && <FavoriteBorder />}
                     {key === 'Recents' && <ScheduleIcon />}
+                    {key === "Screaming Frog" && <img src={ScreamingFrogIcon} alt="frog" style={{ width: 24, height: 24 }} />}
                   </ListItemIcon>
                   <ListItemText primary={key} sx={listItemTextSx} />
                 </ListItemButton>
@@ -494,7 +502,10 @@ const Dashboard = () => {
                     {pageDescription}
                   </Typography>
                 </Stack>
-                {selectedTab !== Tabs.Recents && (
+                {selectedTab === Tabs["Screaming Frog"] ? (
+                  <Stack direction="row" alignItems="center" spacing={1}>
+                  </Stack>
+                ) : selectedTab !== Tabs.Recents && (
                   <Stack direction="row" alignItems="center" spacing={1}>
                     <Typography variant="body2" color="white">
                       Sort by:
@@ -593,6 +604,9 @@ const Dashboard = () => {
                   px: 2.5
                 }}
               >
+              {selectedTab === Tabs["Screaming Frog"] ? (
+                  <Stack sx={{color: 'white'}}>Screaming Frog support is offered exclusively through our application for the best possible experience.</Stack>
+                ) : (
                 <Grid container spacing={3}>
                   {getSortedApps()
                     .filter((app) => {
@@ -786,6 +800,7 @@ const Dashboard = () => {
                     </Grid>
                   )}
                 </Grid>
+                )}
               </SimpleBarScroll>
             </Stack>
           )}
