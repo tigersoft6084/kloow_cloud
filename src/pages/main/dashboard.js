@@ -20,6 +20,8 @@ import {
   Tooltip,
   Divider
 } from '@mui/material';
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { useTheme } from "@mui/material/styles";
 import { FavoriteBorder, Language } from '@mui/icons-material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -85,6 +87,9 @@ const listItemTextSx = {
 const listItemIconSx = { color: 'white', minWidth: 32 };
 
 const Dashboard = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const { logout } = useAuth();
   const { getAppList, appList, runApp, stopApp, searchPattern, setSearchPattern, setFavorite, setLog } = useMain();
 
@@ -116,6 +121,8 @@ const Dashboard = () => {
   const user = JSON.parse(localStorage.getItem('user')) || {};
   const getItemTitle = (item) => item.title || item.description || '';
   const getItemImg = (item) => (item.logoPath ? 'https://admin.kloow.com/' + item.logoPath : DefaultAppImage);
+
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     getAppList().then((appList) => {
@@ -243,7 +250,7 @@ const Dashboard = () => {
           opacity: 0.5
         }}
       />
-      <Stack spacing={0} sx={{ width: '100%', zIndex: 2, maxWidth: 1447, mx: 'auto' }}>
+      <Stack spacing={0} sx={{ width: '100%', zIndex: 2, maxWidth: '100%', mx: 'auto' }}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2} sx={{ px: 3, height: 60, color: 'white' }}>
           <img src={LogoWithTitle} alt="logo" style={{ height: 24 }} />
           <OutlinedInput
@@ -461,28 +468,60 @@ const Dashboard = () => {
         sx={{
           height: '100vh',
           width: '100%',
-          maxWidth: 1447,
+          maxWidth: '100%',
           mx: 'auto',
           zIndex: 2
         }}
       >
-        <Box sx={{ width: 240, height: '100vh', p: 2.5 }}>
-          <List>
-            {Object.keys(Tabs).map((key) => (
-              <ListItem disablePadding key={key}>
-                <ListItemButton selected={selectedTab === Tabs[key]} onClick={() => setSelectedTab(Tabs[key])} sx={listItemButtonSx}>
-                  <ListItemIcon sx={listItemIconSx}>
-                    {key === 'Applications' && <Language />}
-                    {key === 'Favorites' && <FavoriteBorder />}
-                    {key === 'Recents' && <ScheduleIcon />}
-                    {key === "Screaming Frog" && <img src={ScreamingFrogIcon} alt="frog" style={{ width: 24, height: 24 }} />}
-                  </ListItemIcon>
-                  <ListItemText primary={key} sx={listItemTextSx} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
+        {isMobile ? (
+            <Box
+              onMouseEnter={() => setExpanded(true)}
+              onMouseLeave={() => setExpanded(false)}
+              sx={{
+                width: expanded ? 240 : 100,
+                transition: "width 0.25s ease",
+                height: '100vh',
+                p: 2.5,
+                overflow: 'hidden',
+                pointerEvents: "auto"
+              }}
+            >
+              <List>
+                {Object.keys(Tabs).map((key) => (
+                  <ListItem disablePadding key={key}>
+                    <ListItemButton selected={selectedTab === Tabs[key]} onClick={() => setSelectedTab(Tabs[key])} sx={listItemButtonSx}>
+                      <ListItemIcon sx={listItemIconSx}>
+                        {key === 'Applications' && <Language />}
+                        {key === 'Favorites' && <FavoriteBorder />}
+                        {key === 'Recents' && <ScheduleIcon />}
+                        {key === "Screaming Frog" && <img src={ScreamingFrogIcon} alt="frog" style={{ width: 24, height: 24 }} />}
+                      </ListItemIcon>
+                      { expanded ? <ListItemText primary={key} sx={listItemTextSx} /> : null }
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+            </Box>
+        ) : (
+          // Desktop fixed sidebar
+          <Box sx={{ width: 240, height: '100vh', p: 2.5 }}>
+            <List>
+              {Object.keys(Tabs).map((key) => (
+                <ListItem disablePadding key={key}>
+                  <ListItemButton selected={selectedTab === Tabs[key]} onClick={() => setSelectedTab(Tabs[key])} sx={listItemButtonSx}>
+                    <ListItemIcon sx={listItemIconSx}>
+                      {key === 'Applications' && <Language />}
+                      {key === 'Favorites' && <FavoriteBorder />}
+                      {key === 'Recents' && <ScheduleIcon />}
+                      {key === "Screaming Frog" && <img src={ScreamingFrogIcon} alt="frog" style={{ width: 24, height: 24 }} />}
+                    </ListItemIcon>
+                    <ListItemText primary={key} sx={listItemTextSx} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+        )}
         <Box sx={{ width: `calc(100% - 240px)`, flexGrow: 1, p: 0 }}>
           {loading ? (
             <Loader />
@@ -623,7 +662,7 @@ const Dashboard = () => {
                       return true;
                     })
                     .map((app) => (
-                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={`app_${app.id}`}>
+                      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 3, xxl: 2 }} key={`app_${app.id}`}>
                         <Stack
                           spacing={2}
                           sx={{
@@ -631,7 +670,8 @@ const Dashboard = () => {
                             bgcolor: '#2C3145',
                             color: 'white',
                             borderRadius: '20px',
-                            p: 0.75
+                            p: 0.75,
+                            objectFit: 'fill'
                           }}
                         >
                           <Box sx={{ position: 'relative' }}>
