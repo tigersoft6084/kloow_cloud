@@ -22,7 +22,7 @@ const Landing = () => {
           backgroundColor: '#010511'
         }}
       >
-        <div style={{ width: '100%', margin: '0 auto', maxWidth: '1440px' }}>
+        <div style={{ width: '100%', margin: '0 auto' }}>
           <Hero />
           <WorkflowFeatures />
           <Solutions />

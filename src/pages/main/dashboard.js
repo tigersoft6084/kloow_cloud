@@ -47,11 +47,11 @@ import SimpleBarScroll from 'components/SimpleBar';
 
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
 
 import useSnackbar from 'hooks/useSnackbar';
 import useMain from 'hooks/useMain';
 import useAuth from 'hooks/useAuth';
-import { color } from '@mui/system';
 
 const Tabs = {
   Applications: 1,
@@ -67,7 +67,7 @@ const listItemButtonSx = {
   '&.Mui-selected': {
     backgroundColor: '#252731',
     color: 'white',
-    borderLeft: '4px solid #1976d2'
+    borderLeft: '4px solid #1976d2',
   },
   '&.Mui-selected:hover': {
     backgroundColor: '#252731'
@@ -122,7 +122,9 @@ const Dashboard = () => {
   const getItemTitle = (item) => item.title || item.description || '';
   const getItemImg = (item) => (item.logoPath ? 'https://admin.kloow.com/' + item.logoPath : DefaultAppImage);
 
-  const [expanded, setExpanded] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const sidebarWidth = useMemo(() => (isMobile ? 60 : 240), [isMobile]);
 
   useEffect(() => {
     getAppList().then((appList) => {
@@ -282,7 +284,7 @@ const Dashboard = () => {
               '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                 borderColor: '#343951'
               },
-              width: '476px',
+              width: isMobile ? 'calc(100% - 140px)' : '476px',
               maxWidth: '100%'
             }}
           />
@@ -310,18 +312,22 @@ const Dashboard = () => {
             >
               <img src={RefreshIcon} alt="refresh_icon" style={{ width: 34, height: 34 }} />
             </IconButton>
-            <IconButton
-              onClick={handleMenuOpen}
-              aria-controls={menuOpen ? 'profile-menu' : undefined}
-              aria-haspopup="true"
-              aria-expanded={menuOpen ? 'true' : undefined}
-              sx={{ color: 'white', p: 0 }}
-            >
-              <img src={ProfileIcon} alt="profile_icon" style={{ width: 34, height: 34 }} />
-            </IconButton>
-            <IconButton onClick={logout} sx={{ color: 'white', p: 0 }}>
-              <img src={LogoutIcon} alt="logout_icon" style={{ width: 34, height: 34 }} />
-            </IconButton>
+            {!isMobile && (
+              <>
+                <IconButton
+                  onClick={handleMenuOpen}
+                  aria-controls={menuOpen ? 'profile-menu' : undefined}
+                  aria-haspopup="true"
+                  aria-expanded={menuOpen ? 'true' : undefined}
+                  sx={{ color: 'white', p: 0 }}
+                >
+                  <img src={ProfileIcon} alt="profile_icon" style={{ width: 34, height: 34 }} />
+                </IconButton>
+                <IconButton onClick={logout} sx={{ color: 'white', p: 0 }}>
+                  <img src={LogoutIcon} alt="logout_icon" style={{ width: 34, height: 34 }} />
+                </IconButton>
+              </>
+            )}
           </Stack>
           <Menu
             id="profile-menu"
@@ -475,36 +481,27 @@ const Dashboard = () => {
       >
         {isMobile ? (
             <Box
-              onMouseEnter={() => setExpanded(true)}
-              onMouseLeave={() => setExpanded(false)}
               sx={{
-                width: expanded ? 240 : 100,
+                width: sidebarWidth,
                 transition: "width 0.25s ease",
                 height: '100vh',
-                p: 2.5,
+                p: 1,
                 overflow: 'hidden',
-                pointerEvents: "auto"
+                pointerEvents: "auto",
+                display: 'flex',
+                alignItems: 'flex-start',
+                justifyContent: 'center'
               }}
             >
-              <List>
-                {Object.keys(Tabs).map((key) => (
-                  <ListItem disablePadding key={key}>
-                    <ListItemButton selected={selectedTab === Tabs[key]} onClick={() => setSelectedTab(Tabs[key])} sx={listItemButtonSx}>
-                      <ListItemIcon sx={listItemIconSx}>
-                        {key === 'Applications' && <Language />}
-                        {key === 'Favorites' && <FavoriteBorder />}
-                        {key === 'Recents' && <ScheduleIcon />}
-                        {key === "Screaming Frog" && <img src={ScreamingFrogIcon} alt="frog" style={{ width: 24, height: 24 }} />}
-                      </ListItemIcon>
-                      { expanded ? <ListItemText primary={key} sx={listItemTextSx} /> : null }
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
+              <Stack spacing={2} alignItems="center" sx={{ mt: 1 }}>
+                <IconButton onClick={() => setMobileMenuOpen(true)} sx={{ color: 'white', background: 'rgba(255,255,255,0.04)', width: 44, height: 44 }}>
+                  <MenuIcon />
+                </IconButton>
+              </Stack>
             </Box>
         ) : (
           // Desktop fixed sidebar
-          <Box sx={{ width: 240, height: '100vh', p: 2.5 }}>
+          <Box sx={{ width: sidebarWidth, height: '100vh', p: 2.5 }}>
             <List>
               {Object.keys(Tabs).map((key) => (
                 <ListItem disablePadding key={key}>
@@ -522,18 +519,18 @@ const Dashboard = () => {
             </List>
           </Box>
         )}
-        <Box sx={{ width: `calc(100% - 240px)`, flexGrow: 1, p: 0 }}>
+        <Box sx={{ width: `calc(100% - ${sidebarWidth}px)`, flexGrow: 1, p: 0 }}>
           {loading ? (
             <Loader />
           ) : (
             <Stack spacing={2.5} sx={{ width: '100%', minHeight: `calc(100vh - 110px)` }}>
               <Stack
-                direction="row"
-                alignItems="center"
+                direction={{ xs: 'column', md: 'row' }}
+                alignItems={isMobile ? 'flex-start' : 'center'}
                 justifyContent="space-between"
-                sx={{ height: 60, width: '100%', px: 2.5, pt: 2.5 }}
+                sx={{ height: isMobile ? 'auto' : 60, width: '100%', px: 2.5, pt: 2.5 }}
               >
-                <Stack>
+                <Stack sx={{ width: '100%' }}>
                   <Typography variant="h5" color="white" sx={{ fontWeight: 500, fontSize: 20, lineHeight: '24px' }}>
                     {pageTitle}
                   </Typography>
@@ -545,7 +542,7 @@ const Dashboard = () => {
                   <Stack direction="row" alignItems="center" spacing={1}>
                   </Stack>
                 ) : selectedTab !== Tabs.Recents && (
-                  <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: isMobile ? 1 : 0 }}>
                     <Typography variant="body2" color="white">
                       Sort by:
                     </Typography>
@@ -845,6 +842,46 @@ const Dashboard = () => {
             </Stack>
           )}
         </Box>
+        <Modal open={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
+          <Box sx={{ position: 'fixed', inset: 0, zIndex: 2000, bgcolor: 'rgba(0,0,0,0.6)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <Box sx={{ width: '100%', height: '100%', bgcolor: '#16171E', p: 3, overflow: 'auto' }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <img src={LogoWithTitle} alt="logo" style={{ height: 28 }} />
+                <IconButton onClick={() => setMobileMenuOpen(false)} sx={{ color: 'white' }}>
+                  <CloseIcon />
+                </IconButton>
+              </Stack>
+              <List sx={{ mt: 3 }}>
+                {Object.keys(Tabs).map((key) => (
+                  <ListItem key={`mobtab_${key}`} disablePadding>
+                    <ListItemButton onClick={() => { setSelectedTab(Tabs[key]); setMobileMenuOpen(false); }} sx={{ borderRadius: 2, mb: 1, background: selectedTab === Tabs[key] ? '#2C3145' : 'transparent' }}>
+                      <ListItemIcon sx={{ color: 'white' }}>
+                        {key === 'Applications' && <Language />}
+                        {key === 'Favorites' && <FavoriteBorder />}
+                        {key === 'Recents' && <ScheduleIcon />}
+                        {key === "Screaming Frog" && <img src={ScreamingFrogIcon} alt="frog" style={{ width: 24, height: 24 }} />}
+                      </ListItemIcon>
+                      <ListItemText primary={key} sx={{ '& .MuiTypography-root': { color: 'white', fontSize: 18 } }} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+              <Divider sx={{ borderColor: '#343951', my: 2 }} />
+              <MenuItem onClick={() => { setOpenSetting(true); setMobileMenuOpen(false); }} sx={{ color: 'white' }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <img src={SettingsIcon} alt="settings_icon" style={{ width: 20, height: 20 }} />
+                  <Typography>Account Settings</Typography>
+                </Stack>
+              </MenuItem>
+              <MenuItem onClick={() => { logout(); setMobileMenuOpen(false); }} sx={{ color: 'white' }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <img src={LoginIcon} alt="login_icon" style={{ width: 20, height: 20 }} />
+                  <Typography>Log Out</Typography>
+                </Stack>
+              </MenuItem>
+            </Box>
+          </Box>
+        </Modal>
       </Stack>
       <Modal
         open={openSetting}

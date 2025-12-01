@@ -48,12 +48,13 @@ const Login = () => {
         alignItems="center"
         sx={{
           pt: '100px',
-          maxWidth: 375,
+          maxWidth: 425,
           width: '100%',
           minHeight: '100vh',
           color: 'white',
           margin: 'auto',
-          zIndex: 2
+          zIndex: 2,
+          paddingX: 6
         }}
       >
         <Box sx={{ mb: '60px' }}>
