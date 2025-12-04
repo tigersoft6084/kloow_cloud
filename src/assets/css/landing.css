@@ -3,8 +3,13 @@
 /* Header Styles */
 .header {
   width: 100%;
-  position: relative;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
+  background: rgba(1, 5, 17, 0.6);
+  backdrop-filter: blur(8px);
 }
 
 .header-container {
@@ -162,7 +167,7 @@
   width: 100%;
   /* min-height: 70vh; */
   /* min-height: '753px'; */
-  margin: 168px auto 34px auto;
+  /* margin: 80px auto 34px auto; */
   color: #e6e6e6;
   position: relative;
   display: flex;

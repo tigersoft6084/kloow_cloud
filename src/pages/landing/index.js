@@ -1,5 +1,4 @@
 import React from 'react';
-// import Header from './header';
 import Hero from './hero';
 import Footer from './footer';
 import '../../assets/css/landing.css';
@@ -8,10 +7,11 @@ import Solutions from './solutions';
 import FAQSection from './faq';
 import PricingPlans from './pricing';
 import Testimonials from './testimonials';
+import Header from './header';
 
 const Landing = () => {
   return (
-    <div className="landing-page" style={{ width: '100vw', height: '100vh', backgroundColor: '#010511' }}>
+    <div className="landing-page" style={{ width: '100vw', minHeight: '100vh', backgroundColor: '#010511', overflowX: 'hidden' }}>
       <div
         style={{
           width: '100%',
@@ -23,6 +23,7 @@ const Landing = () => {
         }}
       >
         <div style={{ width: '100%', margin: '0 auto' }}>
+          <Header />
           <Hero />
           <WorkflowFeatures />
           <Solutions />

@@ -1,5 +1,4 @@
 import React from 'react';
-import Header from '../header';
 import '../../../assets/css/landing.css';
 import bgHero from '../../../assets/images/landing/section1_background.png';
 
@@ -20,7 +19,6 @@ const Hero = () => {
         backgroundRepeat: 'no-repeat'
       }}
     >
-      <Header />
       <section className="hero">
         <div
           className="landing-container"
@@ -37,6 +35,8 @@ const Hero = () => {
 
         <div className="hero-content">
           <h1 className="hero-title">
+            <br className="br-desktop" />
+            <br className="br-desktop" />
             The Command Center for Your
             <br className="br-desktop" />
             <span className="highlight">Digital Operations</span>
