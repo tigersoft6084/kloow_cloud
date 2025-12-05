@@ -153,6 +153,19 @@ const Dashboard = () => {
     setRunningStatus(initialStatus);
   }, [appList]);
 
+  // Hide the outer page scrollbar while Dashboard is mounted so only the
+  // internal scroll (SimpleBar) is visible. Restore on unmount.
+  useEffect(() => {
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prevHtmlOverflow || '';
+      document.body.style.overflow = prevBodyOverflow || '';
+    };
+  }, []);
+
   const run = async (id, url, proxyServer) => {
     try {
       setRunningFlag(true);
@@ -479,7 +492,7 @@ const Dashboard = () => {
       <Stack
         direction={'row'}
         sx={{
-          height: '100vh',
+          // height: '100vh',
           width: '100%',
           maxWidth: '100%',
           mx: 'auto',
@@ -491,7 +504,6 @@ const Dashboard = () => {
               sx={{
                 width: sidebarWidth,
                 transition: "width 0.25s ease",
-                height: '100vh',
                 p: 1,
                 overflow: 'hidden',
                 pointerEvents: "auto",
@@ -508,7 +520,7 @@ const Dashboard = () => {
             </Box>
         ) : (
           // Desktop fixed sidebar
-          <Box sx={{ width: sidebarWidth, height: '100vh', p: 2.5 }}>
+          <Box sx={{ width: sidebarWidth, p: 2.5 }}>
             <List>
               {Object.keys(Tabs).map((key) => (
                 <ListItem disablePadding key={key}>
