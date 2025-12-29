@@ -25,6 +25,15 @@ export const MainProvider = ({ children }) => {
     }
   };
 
+  const checkHealth = async (serverSelection) => {
+    try {
+      const response = await axiosServices.post('/check-seocromom-health', { serverSelection });
+      return response.data.healthStatuses;
+    } catch (error) {
+      return null;
+    }
+  }
+
   const runApp = async (id, url, proxyServer) => {
     try {
       const response = await axiosServices.post('/run_app', { id, url, proxyServer }, { withCredentials: true });
