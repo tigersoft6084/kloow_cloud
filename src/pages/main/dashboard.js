@@ -185,12 +185,27 @@ const Dashboard = () => {
   }, [serverSelection]);
 
   useEffect(() => {
-    checkHealth(serverSelection).then(healthStatuses => {
-      if (healthStatuses) {
-        setServerHealth(healthStatuses);
-      }
+    getAppList().then((appList) => {
+      const initialStatus = appList.reduce((acc, app) => {
+        if (app.servers) {
+          setServerSelection((prev) => ({ ...prev, [app.id]: app.servers[0] }));
+        }
+        acc[app.id] = 0;
+        return acc;
+      }, {});
+      setRunningStatus(initialStatus);
+      setLoading(false);
     });
-  }, [serverSelection]);
+    // eslint-disable-next-line
+  }, []);
+
+  // useEffect(() => {
+  //   checkHealth(serverSelection).then(healthStatuses => {
+  //     if (healthStatuses) {
+  //       setServerHealth(healthStatuses);
+  //     }
+  //   });
+  // }, [serverSelection]);
 
   useEffect(() => {
     const initialStatus = appList.reduce((acc, app) => {
