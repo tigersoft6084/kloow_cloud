@@ -32,7 +32,7 @@ export const MainProvider = ({ children }) => {
     } catch (error) {
       return null;
     }
-  }
+  };
 
   const runApp = async (id, url, proxyServer) => {
     try {
@@ -94,6 +94,7 @@ export const MainProvider = ({ children }) => {
       value={{
         ...state,
         getAppList,
+        checkHealth,
         runApp,
         stopApp,
         setSearchPattern,
