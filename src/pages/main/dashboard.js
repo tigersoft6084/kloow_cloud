@@ -845,26 +845,45 @@ const Dashboard = () => {
                                       </Typography>
                                     </Box>
                                   </Box>
-                                  <Box sx={{ display: 'flex', alignItems: 'center', width: runningStatus[app.id] !== 0 ? '50%' : '100%' }}>
+                                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                     {runningStatus[app.id] ? (
-                                      <Button
-                                        disableElevation
-                                        variant="contained"
-                                        onClick={() => (stop(app.id))}
-                                        disabled={tryRunningStatus.includes(app.id) || runningFlag}
-                                        sx={{
-                                          flex: 1,
-                                          minHeight: 36,
-                                          fontWeight: 'bold',
-                                          borderRadius: '8px',
-                                          backgroundColor: runningStatus[app.id] ? '#E03E3E' : '#3A71E1'
-                                        }}
-                                      >
-                                        <>
-                                          <PauseIcon sx={{ mr: 1 }} />
-                                          STOP
-                                        </>
-                                      </Button>
+                                      <>
+                                        <Button
+                                          disableElevation
+                                          variant="contained"
+                                          onClick={() => (stop(app.id))}
+                                          disabled={tryRunningStatus.includes(app.id) || runningFlag}
+                                          sx={{
+                                            flex: 1,
+                                            width: '50%',
+                                            minHeight: 36,
+                                            fontWeight: 'bold',
+                                            borderRadius: '8px',
+                                            backgroundColor: runningStatus[app.id] ? '#E03E3E' : '#3A71E1'
+                                          }}
+                                        >
+                                          <>
+                                            <PauseIcon sx={{ mr: 1 }} />
+                                            STOP
+                                          </>
+                                        </Button>
+                                        <Button
+                                          disableElevation
+                                          variant="contained"
+                                          onClick={() => window.open(`https://www.kloow.com:${runningStatus[app.id]}`, '_blank')}
+                                          color="primary"
+                                          sx={{
+                                            width: '50%',
+                                            fontWeight: 'bold',
+                                            borderRadius: '8px',
+                                            backgroundColor: '#28A745'
+                                          }}
+                                          disabled={tryRunningStatus.includes(app.id) || runningFlag}
+                                        >
+                                          <AdsClickOutlinedIcon sx={{ mr: 1 }} />
+                                          VIEW
+                                        </Button>
+                                      </>
                                     ) : (
                                       <>
                                         <Button
@@ -944,24 +963,6 @@ const Dashboard = () => {
                                     )}
                                   </Box>
                                 </Box>
-                                {runningStatus[app.id] !== 0 && (
-                                  <Button
-                                    disableElevation
-                                    variant="contained"
-                                    onClick={() => window.open(`https://www.kloow.com:${runningStatus[app.id]}`, '_blank')}
-                                    color="primary"
-                                    sx={{
-                                      width: '50%',
-                                      fontWeight: 'bold',
-                                      borderRadius: '8px',
-                                      backgroundColor: '#28A745'
-                                    }}
-                                    disabled={tryRunningStatus.includes(app.id) || runningFlag}
-                                  >
-                                    <AdsClickOutlinedIcon sx={{ mr: 1 }} />
-                                    VIEW
-                                  </Button>
-                                )}
                               </Stack>
                             ) : (
                               <Button
